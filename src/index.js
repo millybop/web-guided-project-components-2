@@ -1,3 +1,5 @@
+import axios from 'axios';
+import breeds from './breeds';
 // 👉 TASK 1- Test out the following endpoints:
 
 //  https://dog.ceo/api/breeds/image/random
@@ -8,7 +10,7 @@
 
 // 👉 TASK 2- Select the "entry point", the element
 // inside of which we'll inject our dog cards 
-const entryPoint = null
+const entryPoint = document.querySelector('.entry');
 
 
 // 👉 TASK 3- `dogCardMaker` takes an object and returns a Dog Card.
@@ -21,13 +23,29 @@ function dogCardMaker({ imageURL, breed }) {
       <h3>
     </div>
   */
-  // set class names, attributes and text
+  // set class names, attributes and 
+
+  const dogCard = document.createElement('div');
+  const image = document.createElement('img');
+  const heading = document.createElement('h3');
 
   // create the hierarchy
 
+  dogCard.appendChild(image);
+  dogCard.appendChild(heading);
   // add some interactivity
+  
+  heading.textContent = `Breed: ${breed}`;
+  image.src = imageURL;
+  dogCard.classList.add('dog-card');
+  image.classList.add('dog-image');
+
+  dogCard.addEventListener('click', () => {
+    dogCard.classList.toggle('selected');
+  });
 
   // never forget to return!
+  return dogCard;
 }
 
 
@@ -41,14 +59,60 @@ function dogCardMaker({ imageURL, breed }) {
 //    * ON FAILURE: log the error to the console
 //    * IN ANY CASE: log "done" to the console
 
+// axios.get('https://dog.ceo/api/breed/dachshund/images/random/5')
+// .then(resp => {
+//     resp.data.message.forEach(imageURL => {
+//       const breed = "Husky";
+//       const dogCard = dogCardMaker({ imageURL, breed });
+//       entryPoint.appendChild(dogCard);
+//    })
+//   })
+// .catch(err =>{
+//   console.log(err);
+// })
+// .finally(() => console.log('Done'))
 
 // 👉 (OPTIONAL) TASK 6- Wrap the fetching operation inside a function `getDogs`
 // that takes a breed and a count (of dogs)
 
+const getDogs = (breed, count) => {
+  axios.get(`https://dog.ceo/api/breed/${breed}/images/random/5`)
+  .then(resp => {
+    resp.data.message.forEach(imageURL => {
+      const dogCard = dogCardMaker({ imageURL, breed });
+      entryPoint.appendChild(dogCard);
+   })
+  })
+.catch(err =>{
+  console.log(err);
+})
+.finally(() => console.log('Done'))
+}
+getDogs('rottweiler',3);
 
 // 👉 (OPTIONAL) TASK 7- Put a button in index.html to 'get dogs' and add a click
 // event listener that executes `getDogs`
 
+const getDogBreeds = () => {
+  axios.get('https://dog.ceo/api/breeds/list/all')
+  .then(resp => {
+    const breeds = Object.keys(resp.data.message);
+    for (let i = 0; i < breeds.length; i++){
+      getDogs(breeds[i], 1);
+    }
+  })
+  .catch(err => console.error(err))
+}
+
+document.querySelector('button').addEventListener('click', () => {
+  entryPoint.innerHTML = '';
+  getDogBreeds();
+  // for (let i = 0; i < breeds.length; i++ ){
+  //   getDogs(breeds[i],3);
+  // }
+})
+
 
 // 👉 (OPTIONAL) TASK 8- Import the breeds from `breeds.js`
 // and loop over them, fetching a dog at each iteration
+
